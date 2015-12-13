@@ -1,0 +1,11 @@
+.popover-example .popover {
+  position: relative;
+  display: block;
+  margin: 20px;
+}
+.new-task-active { 
+  background:#f2f2f2;
+}
+.new-task-inactive {
+  background:white;
+}
