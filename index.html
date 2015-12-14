@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Simple To Do List (STDL) </title>
+		<script src="libs/js/jquery-1.11.3.min.js"></script>
+		<script src="libs/js/jquery.tmpl.js"></script>
+		<script src="libs/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="libs/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/stdl.custom.css">
+		<!-- 
+		-- DEVELOPMENT
+		
+		<script src="engine/dev/enums/stdl.enumfilter.js"></script>
+		<script src="engine/dev/enums/stdl.enumstatus.js"></script>
+		<script src="engine/dev/enums/stdl.enumpriority.js"></script>
+		<script src="engine/dev/enums/stdl.enumcontext.js"></script>
+		<script src="engine/dev/tree/stdl.status.js"></script>
+		<script src="engine/dev/tree/stdl.priority.js"></script>
+		<script src="engine/dev/tree/stdl.taskdomelement.js"></script>
+		<script src="engine/dev/tree/stdl.tree.js"></script>
+		<script src="engine/dev/tree/stdl.index.js"></script>		
+		<script src="engine/dev/tree/stdl.task.js"></script>
+		<script src="engine/dev/treemanager/stdl.treemanager.js"></script>
+		<script src="engine/dev/treemanager/stdl.treeevent.js"></script>
+		<script src="engine/dev/treemanager/stdl.command.js"></script>
+		<script src="engine/dev/treemanager/stdl.howtouse.js"></script>
+		<script src="engine/dev/stdl.paths.js"></script>
+		<script src="engine/dev/stdl.common.js"></script>
+		<script src="engine/dev/stdl.start.js"></script>
+		-->
+		
+		<!-- 
+		--	PRODUCTION
+		-->
+		<script src="engine/prod/stdl.min.js"></script> 
+		
+	</head>
+	<body onclick="stdl.treeManager.setActiveElement()"> 
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-3">
+				  <p class="text-right"><img src="images/logo.png"></img></p>
+				  <ul class="nav nav-pills nav-stacked" id="buttons" >
+				  </ul>		  
+				</div>
+				<div class="col-xs-9">
+					<div class="page-header">
+  						<h1>Simple To Do List (STDL) <small> Enhancing your performance has never been so easy and flexible.</small></h1>
+   					</div>
+					<div id="infoMessageForBrowserSupport" class="alert alert-warning" role="alert">We recommend you to use the lastest version of Chrome for full functional support.</div>
+					<ul class="nav nav-tabs">
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks()" data-container="body" data-toggle="popover" data-placement="left" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">All tasks (<span id="count_all"></span>)</a></li>
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks(stdl.paths.taskStatus, stdl.enumStatus.active, stdl.enumFilter.active)">Active tasks (<span id="count_active"></span>)</a></li>
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks(stdl.paths.taskStatus, stdl.enumStatus.closed, stdl.enumFilter.closed)">Closed tasks (<span id="count_closed"></span>)</a></li>
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks(stdl.paths.taskPriority, stdl.enumPriority.high, stdl.enumFilter.high)">High tasks (<span id="count_high"></span>)</a></li>
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks(stdl.paths.taskPriority, stdl.enumPriority.middle, stdl.enumFilter.middle)">Middle tasks (<span id="count_middle"></span>)</a></li>
+					  <li><a href="#" onclick="stdl.treeManager.filterTasks(stdl.paths.taskPriority, stdl.enumPriority.low, stdl.enumFilter.low)">Low tasks (<span id="count_low"></span>)</a></li>
+					</ul>
+					<div id="FutureTasks"></div>
+				
+				</div>
+			</div>
+		</div>
+
+		<footer class="footer">
+	  		<div class="container">
+				<p><a href="https://github.com/ivandimitrov1/simple-to-do-list">Find more about this project</a></p>
+	  		</div>
+		</footer>
+
+		<!--
+		--	TEMPLATES
+		--
+		-->
+		<script id="UploadButtonTemplate" type="text/x-jQuery-tmpl">
+			<li role="presentation">
+			<input type="file" onchange="stdl.tree.restoreFromTextFile(event)" id="upload" name="upload" style="visibility: hidden; width: 1px; height: 1px" multiple />
+			<a href="#" class="text-right" onclick="stdl.treeManager.showOpenFileDialog()"  data-toggle="tooltip" title="${toolTip}">${buttonName}</a></li>
+		</script>
+
+		<script id="ButtonTemplate" type="text/x-jQuery-tmpl">
+			<li role="presentation">
+				<a href="#" class="text-right" onclick="stdl.treeManager.executeCommand(${keyCode})" data-toggle="tooltip" title="${toolTip}">${buttonName}</a>
+			</li>
+		</script>
+
+		<script id="TaskTemplate" type="text/x-jQuery-tmpl">
+			<div class="panel panel-default new-task-active" name="newTasks">
+				<div class="panel-heading">
+					<span class="badge" name="index" style="${indexVisability}">${index}</span>
+				</div>
+		  		<div class="panel-body">
+					<div class="row">
+						<div class="col-xs-8">
+							<input class="form-control forminput" value="${defaultText}" placeholder="Keep it short and simple." name="description" onkeyup="stdl.treeManager.writeChanges()"
+							onfocus="stdl.treeManager.setActiveElement()">
+						</div>
+						<div class="col-xs-2" style="${priorityVisability}">
+							<select class="form-control"  name="taskPriority" onchange="stdl.treeManager.writeChanges();stdl.treeManager.changePriorityColor();">
+								<option value="high" ${highPrioritySelected}>High</option>
+								<option value="middle" ${middlePrioritySelected}>Middle</option>
+								<option value="low"  ${lowPrioritySelected}>Low</option>
+							</select>
+						</div>
+						<div class="col-xs-2" style="${statusVisability}">
+							<select class="form-control" name="taskStatus" onchange="stdl.treeManager.setVisabilityOfTask();stdl.treeManager.writeChanges()">
+								<option value="active" ${activeSelected}>Active</option>
+								<option value="closed" ${closedSelected}>Closed</option>
+							</select>
+						</div>
+					</div>
+		  		</div>
+			</div>
+		</script>
+
+	</body>
+</html>
