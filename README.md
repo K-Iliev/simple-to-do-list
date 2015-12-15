@@ -3,6 +3,7 @@ Enhance your performance.
 
 Productivity tool. It supports :
 - add, delete, insert, clear, sub tasks
+- serverless
 - store and restore a list
 - task sections divided by status and priority
 - work with the keyboard
